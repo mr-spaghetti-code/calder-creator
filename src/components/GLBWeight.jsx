@@ -138,7 +138,7 @@ export default function GLBWeight({ node, position }) {
   }, [geometryData, modelOffset, modelScale])
   
   return (
-    <group ref={groupRef} position={[position.x, position.y, 0]}>
+    <group ref={groupRef} position={[position.x, position.y, position.z || 0]}>
       {/* Wire connecting to arm - goes from origin upward */}
       {nodeWireLength > 0 && (
         <mesh position={[0, wireY, 0]}>

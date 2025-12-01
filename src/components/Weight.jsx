@@ -206,7 +206,7 @@ export default function Weight({ node, position }) {
   }
   
   return (
-    <group position={[position.x, position.y, 0]}>
+    <group position={[position.x, position.y, position.z || 0]}>
       {/* Wire connecting to arm - spans from top of weight to arm endpoint */}
       {actualWireLength > 0 && (
         <mesh position={[0, wireY, 0]}>

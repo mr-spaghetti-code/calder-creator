@@ -13,10 +13,26 @@ import {
   getNodeSide,
   createMobileFromPreset,
   exportMobileToJSON,
-  importMobileFromJSON
+  importMobileFromJSON,
+  collectArms
 } from '../models/mobileTree'
 import { getPresetById } from '../config/presets'
 import { METRIC_RANGES } from '../config/units'
+
+// Generate random yaw angles for all arms in the tree
+function generateYawAngles(node) {
+  const arms = collectArms(node)
+  const angles = {}
+  arms.forEach(arm => {
+    // Random angle between -PI/2 and PI/2 (±90 degrees)
+    // Use arm ID hash for some determinism within a session
+    const hash = arm.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+    const seededRandom = Math.sin(hash * 9999) * 10000
+    const random = seededRandom - Math.floor(seededRandom)
+    angles[arm.id] = (random - 0.5) * Math.PI
+  })
+  return angles
+}
 
 const useMobileStore = create((set, get) => ({
   // State
@@ -24,6 +40,8 @@ const useMobileStore = create((set, get) => ({
   selectedId: null,
   isAnimating: false,
   orbitControlsEnabled: true,
+  viewMode: 'flat', // 'flat' | '3d'
+  armYawAngles: {}, // Map of arm ID to yaw angle (radians)
   
   // Computed getters
   getSelectedNode: () => {
@@ -51,6 +69,19 @@ const useMobileStore = create((set, get) => ({
   })),
   
   setOrbitControlsEnabled: (enabled) => set({ orbitControlsEnabled: enabled }),
+  
+  toggleViewMode: () => set((state) => {
+    const newMode = state.viewMode === 'flat' ? '3d' : 'flat'
+    // Generate new random yaw angles when switching to 3D mode
+    const newAngles = newMode === '3d' ? generateYawAngles(state.mobile) : {}
+    return { viewMode: newMode, armYawAngles: newAngles }
+  }),
+  
+  getYawAngle: (armId) => {
+    const { viewMode, armYawAngles } = get()
+    if (viewMode === 'flat') return 0
+    return armYawAngles[armId] || 0
+  },
   
   expandWeight: (weightId) => set((state) => {
     if (!canExpandAt(state.mobile, weightId)) return state
@@ -85,7 +116,10 @@ const useMobileStore = create((set, get) => ({
       parent.rightChild = newArm
     }
     
-    return { mobile: newMobile, selectedId: null }
+    // Regenerate yaw angles if in 3D mode
+    const newAngles = state.viewMode === '3d' ? generateYawAngles(newMobile) : state.armYawAngles
+    
+    return { mobile: newMobile, selectedId: null, armYawAngles: newAngles }
   }),
   
   deleteNode: (nodeId) => set((state) => {
@@ -260,7 +294,9 @@ const useMobileStore = create((set, get) => ({
   resetMobile: () => set({
     mobile: createInitialMobile(),
     selectedId: null,
-    isAnimating: false
+    isAnimating: false,
+    viewMode: 'flat',
+    armYawAngles: {}
   }),
   
   loadPreset: (presetId) => {
@@ -268,10 +304,14 @@ const useMobileStore = create((set, get) => ({
     if (!preset) return
     
     const newMobile = createMobileFromPreset(preset.tree)
+    const { viewMode } = get()
+    const newAngles = viewMode === '3d' ? generateYawAngles(newMobile) : {}
+    
     set({
       mobile: newMobile,
       selectedId: null,
-      isAnimating: false
+      isAnimating: false,
+      armYawAngles: newAngles
     })
     
     // Auto-balance after loading
@@ -301,10 +341,14 @@ const useMobileStore = create((set, get) => ({
   importMobileJSON: (json) => {
     try {
       const newMobile = importMobileFromJSON(json)
+      const { viewMode } = get()
+      const newAngles = viewMode === '3d' ? generateYawAngles(newMobile) : {}
+      
       set({
         mobile: newMobile,
         selectedId: null,
-        isAnimating: false
+        isAnimating: false,
+        armYawAngles: newAngles
       })
       return { success: true }
     } catch (error) {

@@ -6,7 +6,7 @@ import PivotHandle from './PivotHandle'
 import { calculateTiltAngle, calculateBalanceRatio, getBalanceColor } from '../physics/balanceSolver'
 import { DEFAULT_WIRE_LENGTH } from './Mobile'
 
-export default function Arm({ node, position, parentRotation = 0 }) {
+export default function Arm({ node, position, parentRotation = 0, yawAngle = 0 }) {
   const groupRef = useRef()
   const meshRef = useRef()
   
@@ -53,58 +53,61 @@ export default function Arm({ node, position, parentRotation = 0 }) {
   const wireLength = node.wireLength ?? DEFAULT_WIRE_LENGTH
   
   return (
-    <group ref={groupRef} position={[position.x, position.y, 0]}>
+    <group ref={groupRef} position={[position.x, position.y, position.z || 0]}>
       {/* Wire connecting to parent - OUTSIDE the rotated group to stay vertical */}
       <mesh position={[0, wireLength / 2, 0]}>
         <cylinderGeometry args={[0.02, 0.02, wireLength, 8]} />
         <meshStandardMaterial color="#71717a" metalness={0.6} roughness={0.4} />
       </mesh>
       
-      {/* Rotated arm group */}
-      <group rotation={[0, 0, totalRotation]}>
-        {/* Arm rod */}
-        <mesh 
-          ref={meshRef}
-          onClick={handleClick}
-          position={[armCenterOffset, 0, 0]}
-          rotation={[0, 0, Math.PI / 2]}
-          castShadow
-          receiveShadow
-        >
-          <cylinderGeometry args={[0.06, 0.06, node.length, 16]} />
-          <meshStandardMaterial 
-            color={new THREE.Color(balanceColor.r, balanceColor.g, balanceColor.b)}
-            metalness={0.7}
-            roughness={0.3}
-          />
-        </mesh>
-        
-        {/* Left endpoint marker */}
-        <mesh position={[-leftDistance, 0, 0]}>
-          <sphereGeometry args={[0.08, 12, 12]} />
-          <meshStandardMaterial color="#a1a1aa" metalness={0.5} roughness={0.4} />
-        </mesh>
-        
-        {/* Right endpoint marker */}
-        <mesh position={[rightDistance, 0, 0]}>
-          <sphereGeometry args={[0.08, 12, 12]} />
-          <meshStandardMaterial color="#a1a1aa" metalness={0.5} roughness={0.4} />
-        </mesh>
-        
-        {/* Pivot handle (draggable) */}
-        <PivotHandle 
-          arm={node} 
-          armWorldPosition={position}
-          armRotation={totalRotation}
-        />
-        
-        {/* Selection indicator */}
-        {isSelected && (
-          <mesh position={[armCenterOffset, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
-            <cylinderGeometry args={[0.1, 0.1, node.length + 0.1, 16]} />
-            <meshBasicMaterial color="#3b82f6" transparent opacity={0.3} />
+      {/* Yaw rotation group - rotates the entire arm around Y axis */}
+      <group rotation={[0, yawAngle, 0]}>
+        {/* Tilt rotation group - rotates the arm for balance */}
+        <group rotation={[0, 0, totalRotation]}>
+          {/* Arm rod */}
+          <mesh 
+            ref={meshRef}
+            onClick={handleClick}
+            position={[armCenterOffset, 0, 0]}
+            rotation={[0, 0, Math.PI / 2]}
+            castShadow
+            receiveShadow
+          >
+            <cylinderGeometry args={[0.06, 0.06, node.length, 16]} />
+            <meshStandardMaterial 
+              color={new THREE.Color(balanceColor.r, balanceColor.g, balanceColor.b)}
+              metalness={0.7}
+              roughness={0.3}
+            />
           </mesh>
-        )}
+          
+          {/* Left endpoint marker */}
+          <mesh position={[-leftDistance, 0, 0]}>
+            <sphereGeometry args={[0.08, 12, 12]} />
+            <meshStandardMaterial color="#a1a1aa" metalness={0.5} roughness={0.4} />
+          </mesh>
+          
+          {/* Right endpoint marker */}
+          <mesh position={[rightDistance, 0, 0]}>
+            <sphereGeometry args={[0.08, 12, 12]} />
+            <meshStandardMaterial color="#a1a1aa" metalness={0.5} roughness={0.4} />
+          </mesh>
+          
+          {/* Pivot handle (draggable) */}
+          <PivotHandle 
+            arm={node} 
+            armWorldPosition={position}
+            armRotation={totalRotation}
+          />
+          
+          {/* Selection indicator */}
+          {isSelected && (
+            <mesh position={[armCenterOffset, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+              <cylinderGeometry args={[0.1, 0.1, node.length + 0.1, 16]} />
+              <meshBasicMaterial color="#3b82f6" transparent opacity={0.3} />
+            </mesh>
+          )}
+        </group>
       </group>
     </group>
   )

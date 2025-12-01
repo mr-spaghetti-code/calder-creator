@@ -8,7 +8,7 @@ import { calculateTiltAngle } from '../physics/balanceSolver'
 export const DEFAULT_WIRE_LENGTH = 0.7
 
 // Recursively render the mobile tree
-function MobileNode({ node, position, parentRotation = 0 }) {
+function MobileNode({ node, position, parentRotation = 0, parentYaw = 0, viewMode, armYawAngles }) {
   if (!node) return null
   
   if (node.type === 'weight') {
@@ -20,23 +20,42 @@ function MobileNode({ node, position, parentRotation = 0 }) {
     const tiltAngle = calculateTiltAngle(node)
     const totalRotation = parentRotation + tiltAngle
     
+    // Get this arm's yaw angle (only applies in 3D mode)
+    const armYaw = viewMode === '3d' ? (armYawAngles[node.id] || 0) : 0
+    const totalYaw = parentYaw + armYaw  // Accumulated yaw to pass to children
+    
     // Calculate child positions
     const leftDistance = node.pivotPosition * node.length
     const rightDistance = (1 - node.pivotPosition) * node.length
     
-    const cosAngle = Math.cos(totalRotation)
-    const sinAngle = Math.sin(totalRotation)
+    const cosTilt = Math.cos(totalRotation)
+    const sinTilt = Math.sin(totalRotation)
+    // Use only THIS arm's yaw for endpoint calculations
+    // (parent yaw is already baked into `position`)
+    const cosYaw = Math.cos(armYaw)
+    const sinYaw = Math.sin(armYaw)
     
-    // Left end position
+    // In flat mode (yaw=0): left end is at (-leftDistance * cosTilt, -sinTilt * leftDistance, 0)
+    // In 3D mode: the horizontal component (cosTilt) is rotated by yaw around Y axis
+    // Y-axis rotation formula: (x, y, z) -> (x*cos(yaw) + z*sin(yaw), y, -x*sin(yaw) + z*cos(yaw))
+    // With z=0: x' = x*cos(yaw), z' = -x*sin(yaw)
+    
+    // Left end position (relative to pivot, then add pivot position)
+    const leftLocalX = -leftDistance * cosTilt
+    const leftLocalY = -leftDistance * sinTilt
     const leftEndPos = {
-      x: position.x - leftDistance * cosAngle,
-      y: position.y - leftDistance * sinAngle
+      x: position.x + leftLocalX * cosYaw,
+      y: position.y + leftLocalY,
+      z: position.z - leftLocalX * sinYaw  // Note: -x*sin(yaw) from rotation formula
     }
     
     // Right end position
+    const rightLocalX = rightDistance * cosTilt
+    const rightLocalY = rightDistance * sinTilt
     const rightEndPos = {
-      x: position.x + rightDistance * cosAngle,
-      y: position.y + rightDistance * sinAngle
+      x: position.x + rightLocalX * cosYaw,
+      y: position.y + rightLocalY,
+      z: position.z - rightLocalX * sinYaw  // Note: -x*sin(yaw) from rotation formula
     }
     
     // Use each child's individual wire length for positioning
@@ -45,12 +64,14 @@ function MobileNode({ node, position, parentRotation = 0 }) {
     
     const leftChildPos = {
       x: leftEndPos.x,
-      y: leftEndPos.y - leftWireLength
+      y: leftEndPos.y - leftWireLength,
+      z: leftEndPos.z
     }
     
     const rightChildPos = {
       x: rightEndPos.x,
-      y: rightEndPos.y - rightWireLength
+      y: rightEndPos.y - rightWireLength,
+      z: rightEndPos.z
     }
     
     return (
@@ -59,16 +80,23 @@ function MobileNode({ node, position, parentRotation = 0 }) {
           node={node} 
           position={position} 
           parentRotation={parentRotation}
+          yawAngle={armYaw}
         />
         <MobileNode 
           node={node.leftChild} 
           position={leftChildPos}
           parentRotation={totalRotation}
+          parentYaw={totalYaw}
+          viewMode={viewMode}
+          armYawAngles={armYawAngles}
         />
         <MobileNode 
           node={node.rightChild} 
           position={rightChildPos}
           parentRotation={totalRotation}
+          parentYaw={totalYaw}
+          viewMode={viewMode}
+          armYawAngles={armYawAngles}
         />
       </>
     )
@@ -79,9 +107,11 @@ function MobileNode({ node, position, parentRotation = 0 }) {
 
 export default function Mobile() {
   const mobile = useMobileStore((state) => state.mobile)
+  const viewMode = useMobileStore((state) => state.viewMode)
+  const armYawAngles = useMobileStore((state) => state.armYawAngles)
   
-  // Start position: below the suspension point
-  const startPosition = useMemo(() => ({ x: 0, y: 4.3 }), [])
+  // Start position: below the suspension point (now with z coordinate)
+  const startPosition = useMemo(() => ({ x: 0, y: 4.3, z: 0 }), [])
   
   return (
     <group>
@@ -89,6 +119,9 @@ export default function Mobile() {
         node={mobile} 
         position={startPosition}
         parentRotation={0}
+        parentYaw={0}
+        viewMode={viewMode}
+        armYawAngles={armYawAngles}
       />
     </group>
   )
