@@ -42,6 +42,7 @@ const useMobileStore = create((set, get) => ({
   orbitControlsEnabled: true,
   viewMode: 'flat', // 'flat' | '3d'
   armYawAngles: {}, // Map of arm ID to yaw angle (radians)
+  rotatingArmId: null, // ID of arm currently being rotated (null = no rotation)
   
   // Computed getters
   getSelectedNode: () => {
@@ -205,6 +206,19 @@ const useMobileStore = create((set, get) => ({
     return { mobile: newMobile }
   }),
   
+  // Rotation animation actions
+  startRotation: (armId) => set({ rotatingArmId: armId }),
+  
+  stopRotation: () => set({ rotatingArmId: null }),
+  
+  // Update yaw angle for an arm (used by animation loop)
+  updateArmYawAngle: (armId, delta) => set((state) => ({
+    armYawAngles: {
+      ...state.armYawAngles,
+      [armId]: (state.armYawAngles[armId] || 0) + delta
+    }
+  })),
+  
   autoBalance: () => {
     const state = get()
     const newMobile = cloneTree(state.mobile)
@@ -296,7 +310,8 @@ const useMobileStore = create((set, get) => ({
     selectedId: null,
     isAnimating: false,
     viewMode: 'flat',
-    armYawAngles: {}
+    armYawAngles: {},
+    rotatingArmId: null
   }),
   
   loadPreset: (presetId) => {
@@ -311,7 +326,8 @@ const useMobileStore = create((set, get) => ({
       mobile: newMobile,
       selectedId: null,
       isAnimating: false,
-      armYawAngles: newAngles
+      armYawAngles: newAngles,
+      rotatingArmId: null
     })
     
     // Auto-balance after loading
@@ -348,7 +364,8 @@ const useMobileStore = create((set, get) => ({
         mobile: newMobile,
         selectedId: null,
         isAnimating: false,
-        armYawAngles: newAngles
+        armYawAngles: newAngles,
+        rotatingArmId: null
       })
       return { success: true }
     } catch (error) {

@@ -44,6 +44,7 @@ body {
 
 .canvas-container {
   flex: 1;
+  min-width: 0; /* Allow canvas to shrink below content size */
   position: relative;
 }
 
@@ -400,6 +401,17 @@ input[type="color"]::-webkit-color-swatch {
 
 .btn-primary:hover {
   background: var(--accent-hover);
+}
+
+.btn-warning {
+  background: rgba(234, 179, 8, 0.2);
+  color: var(--warning);
+  border: 1px solid rgba(234, 179, 8, 0.4);
+}
+
+.btn-warning:hover {
+  background: rgba(234, 179, 8, 0.3);
+  border-color: rgba(234, 179, 8, 0.6);
 }
 
 .btn-danger {

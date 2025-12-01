@@ -1,14 +1,18 @@
 import React, { useMemo } from 'react'
+import { useFrame } from '@react-three/fiber'
 import useMobileStore from '../store/mobileStore'
 import Arm from './Arm'
 import Weight from './Weight'
 import { calculateTiltAngle } from '../physics/balanceSolver'
 
+// Rotation speed in radians per second (negative = clockwise when viewed from above)
+const ROTATION_SPEED = -1.5
+
 // Default wire length for backwards compatibility
 export const DEFAULT_WIRE_LENGTH = 0.7
 
 // Recursively render the mobile tree
-function MobileNode({ node, position, parentRotation = 0, parentYaw = 0, viewMode, armYawAngles }) {
+function MobileNode({ node, position, parentRotation = 0, parentYaw = 0, armYawAngles }) {
   if (!node) return null
   
   if (node.type === 'weight') {
@@ -20,8 +24,8 @@ function MobileNode({ node, position, parentRotation = 0, parentYaw = 0, viewMod
     const tiltAngle = calculateTiltAngle(node)
     const totalRotation = parentRotation + tiltAngle
     
-    // Get this arm's yaw angle (only applies in 3D mode)
-    const armYaw = viewMode === '3d' ? (armYawAngles[node.id] || 0) : 0
+    // Get this arm's yaw angle (used for 3D mode and rotation animation)
+    const armYaw = armYawAngles[node.id] || 0
     const totalYaw = parentYaw + armYaw  // Accumulated yaw to pass to children
     
     // Calculate child positions
@@ -87,7 +91,6 @@ function MobileNode({ node, position, parentRotation = 0, parentYaw = 0, viewMod
           position={leftChildPos}
           parentRotation={totalRotation}
           parentYaw={totalYaw}
-          viewMode={viewMode}
           armYawAngles={armYawAngles}
         />
         <MobileNode 
@@ -95,7 +98,6 @@ function MobileNode({ node, position, parentRotation = 0, parentYaw = 0, viewMod
           position={rightChildPos}
           parentRotation={totalRotation}
           parentYaw={totalYaw}
-          viewMode={viewMode}
           armYawAngles={armYawAngles}
         />
       </>
@@ -107,8 +109,18 @@ function MobileNode({ node, position, parentRotation = 0, parentYaw = 0, viewMod
 
 export default function Mobile() {
   const mobile = useMobileStore((state) => state.mobile)
-  const viewMode = useMobileStore((state) => state.viewMode)
   const armYawAngles = useMobileStore((state) => state.armYawAngles)
+  const rotatingArmId = useMobileStore((state) => state.rotatingArmId)
+  const updateArmYawAngle = useMobileStore((state) => state.updateArmYawAngle)
+  
+  // Animation loop for rotation
+  useFrame((_, delta) => {
+    if (rotatingArmId) {
+      // Update the yaw angle of the rotating arm
+      // delta is in seconds, ROTATION_SPEED is radians/second
+      updateArmYawAngle(rotatingArmId, ROTATION_SPEED * delta)
+    }
+  })
   
   // Start position: below the suspension point (now with z coordinate)
   const startPosition = useMemo(() => ({ x: 0, y: 4.3, z: 0 }), [])
@@ -120,7 +132,6 @@ export default function Mobile() {
         position={startPosition}
         parentRotation={0}
         parentYaw={0}
-        viewMode={viewMode}
         armYawAngles={armYawAngles}
       />
     </group>

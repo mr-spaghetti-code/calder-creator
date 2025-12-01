@@ -18,6 +18,9 @@ export default function ArmPanel({ arm }) {
   const updateArm = useMobileStore((state) => state.updateArm)
   const deleteNode = useMobileStore((state) => state.deleteNode)
   const clearSelection = useMobileStore((state) => state.clearSelection)
+  const rotatingArmId = useMobileStore((state) => state.rotatingArmId)
+  const startRotation = useMobileStore((state) => state.startRotation)
+  const stopRotation = useMobileStore((state) => state.stopRotation)
   
   // Subscribe to unit system changes
   const [unitSystem, setUnitSystem] = useState(getUnitSystem())
@@ -42,6 +45,16 @@ export default function ArmPanel({ arm }) {
     if (!isRoot) {
       deleteNode(arm.id)
       clearSelection()
+    }
+  }
+  
+  const isRotating = rotatingArmId === arm.id
+  
+  const handleToggleRotation = () => {
+    if (isRotating) {
+      stopRotation()
+    } else {
+      startRotation(arm.id)
     }
   }
   
@@ -205,33 +218,54 @@ export default function ArmPanel({ arm }) {
         </div>
       </div>
       
-      {!isRoot && (
-        <div className="panel-section">
-          <span className="panel-section-title">Actions</span>
-          
-          <button 
-            className="btn btn-danger"
-            onClick={handleDelete}
-            style={{ width: '100%' }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polyline points="3 6 5 6 21 6" />
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-            </svg>
-            Delete Arm & Subtree
-          </button>
-          
-          <div className="help-text" style={{ marginTop: '8px', fontSize: '11px' }}>
-            Warning: Deleting an arm removes all weights and arms attached below it.
-          </div>
-        </div>
-      )}
+      <div className="panel-section">
+        <span className="panel-section-title">Actions</span>
+        
+        <button 
+          className={`btn ${isRotating ? 'btn-warning' : 'btn-primary'}`}
+          onClick={handleToggleRotation}
+          style={{ width: '100%', marginBottom: !isRoot ? '8px' : '0' }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            {isRotating ? (
+              <>
+                <rect x="6" y="4" width="4" height="16" />
+                <rect x="14" y="4" width="4" height="16" />
+              </>
+            ) : (
+              <>
+                <path d="M21 12a9 9 0 1 1-9-9" />
+                <polyline points="21 3 21 9 15 9" />
+              </>
+            )}
+          </svg>
+          {isRotating ? 'Stop Rotation' : 'Start Rotation'}
+        </button>
+        
+        {!isRoot && (
+          <>
+            <button 
+              className="btn btn-danger"
+              onClick={handleDelete}
+              style={{ width: '100%' }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              </svg>
+              Delete Arm & Subtree
+            </button>
+            
+            <div className="help-text" style={{ marginTop: '8px', fontSize: '11px' }}>
+              Warning: Deleting an arm removes all weights and arms attached below it.
+            </div>
+          </>
+        )}
+      </div>
       
-      {isRoot && (
-        <div className="help-text" style={{ marginTop: '16px' }}>
-          This is the root arm and cannot be deleted. Adjust its length or pivot to balance the mobile.
-        </div>
-      )}
+      <div className="help-text" style={{ marginTop: '8px', fontSize: '11px' }}>
+        Rotation animates this arm and all attached children (arms & weights).
+      </div>
     </>
   )
 }
