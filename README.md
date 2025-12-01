@@ -2,9 +2,9 @@
 
 An interactive web application for designing balanced kinetic mobiles, inspired by the sculptures of Alexander Calder.
 
-**[Try the live demo](https://calder-creator.vercel.app/)**
+https://github.com/user-attachments/assets/365a1b5c-30de-4057-a5a4-0cac66e094fd
 
-https://github.com/mr-spaghetti-code/calder-creator/blob/main/calder.mp4
+**[Try the live demo](https://calder-creator.vercel.app/)**
 
 ---
 
