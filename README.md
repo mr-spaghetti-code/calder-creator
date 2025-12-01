@@ -4,6 +4,8 @@ An interactive web application for designing balanced kinetic mobiles, inspired 
 
 **[Try the live demo](https://calder-creator.vercel.app/)**
 
+https://github.com/jfiadeiro/calder-creator/raw/main/calder.mp4
+
 ---
 
 ## Overview

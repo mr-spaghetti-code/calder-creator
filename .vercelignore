@@ -1,0 +1,4 @@
+# Ignore video files (only needed for GitHub README)
+*.mp4
+calder.mp4
+
