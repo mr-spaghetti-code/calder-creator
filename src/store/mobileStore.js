@@ -44,6 +44,22 @@ const useMobileStore = create((set, get) => ({
   armYawAngles: {}, // Map of arm ID to yaw angle (radians)
   rotatingArmId: null, // ID of arm currently being rotated (null = no rotation)
   
+  // Physics state
+  physicsEnabled: false, // Toggle between analytical and physics mode
+  isPaused: false, // Pause physics simulation
+  timeScale: 1.0, // Time scale for physics (0.1 to 1.0)
+  damping: 0.2, // Air resistance / damping (0 to 1, maps to actual damping values) - low default for realistic motion
+  windIntensity: 0, // Wind strength (0 to 1)
+  windMode: 'uniform', // 'uniform' | 'turbulent'
+  windDirection: [1, 0, 0.3], // Wind direction vector (normalized)
+  
+  // Collision state
+  collisionsDetected: [], // Array of collision pairs
+  showSwingEnvelope: false, // Toggle for swing envelope visualization
+  
+  // Physics body refs registry (for applying forces)
+  physicsRefs: {}, // Map of node ID to RigidBody ref
+  
   // Computed getters
   getSelectedNode: () => {
     const { mobile, selectedId } = get()
@@ -219,9 +235,81 @@ const useMobileStore = create((set, get) => ({
     }
   })),
   
+  // Physics actions
+  togglePhysics: () => set((state) => ({ 
+    physicsEnabled: !state.physicsEnabled,
+    isPaused: false 
+  })),
+  
+  setPhysicsEnabled: (enabled) => set({ physicsEnabled: enabled, isPaused: false }),
+  
+  togglePause: () => set((state) => ({ isPaused: !state.isPaused })),
+  
+  setPaused: (paused) => set({ isPaused: paused }),
+  
+  setTimeScale: (scale) => set({ timeScale: Math.max(0.1, Math.min(1.0, scale)) }),
+  
+  setDamping: (damping) => set({ damping: Math.max(0, Math.min(1, damping)) }),
+  
+  setWindIntensity: (intensity) => set({ windIntensity: Math.max(0, Math.min(1, intensity)) }),
+  
+  setWindMode: (mode) => set({ windMode: mode }),
+  
+  setWindDirection: (direction) => {
+    // Normalize the direction vector
+    const len = Math.sqrt(direction[0]**2 + direction[1]**2 + direction[2]**2)
+    if (len > 0) {
+      set({ windDirection: [direction[0]/len, direction[1]/len, direction[2]/len] })
+    }
+  },
+  
+  // Collision tracking
+  addCollision: (pair) => set((state) => ({
+    collisionsDetected: [...state.collisionsDetected, pair]
+  })),
+  
+  clearCollisions: () => set({ collisionsDetected: [] }),
+  
+  toggleSwingEnvelope: () => set((state) => ({ 
+    showSwingEnvelope: !state.showSwingEnvelope 
+  })),
+  
+  // Physics refs registry
+  registerPhysicsRef: (nodeId, ref) => set((state) => ({
+    physicsRefs: { ...state.physicsRefs, [nodeId]: ref }
+  })),
+  
+  unregisterPhysicsRef: (nodeId) => set((state) => {
+    const newRefs = { ...state.physicsRefs }
+    delete newRefs[nodeId]
+    return { physicsRefs: newRefs }
+  }),
+  
+  // Get physics ref for a node
+  getPhysicsRef: (nodeId) => get().physicsRefs[nodeId],
+  
+  // Reset physics to equilibrium
+  resetToEquilibrium: () => {
+    const state = get()
+    // Clear velocities by temporarily pausing and then resetting positions
+    // The actual position reset will be handled by components reading from analytical solver
+    set({ 
+      isPaused: true,
+      collisionsDetected: []
+    })
+    // After a brief pause, components should reset their physics bodies
+    setTimeout(() => {
+      set({ isPaused: false })
+    }, 100)
+  },
+  
   autoBalance: () => {
     const state = get()
     const newMobile = cloneTree(state.mobile)
+    
+    // Arm mass constants (must match balanceSolver.js and mobileTree.js)
+    const ARM_BASE_MASS = 0.1
+    const ARM_MASS_PER_LENGTH = 0.05
     
     // Collect all target pivot positions
     const targetPivots = new Map()
@@ -235,12 +323,16 @@ const useMobileStore = create((set, get) => ({
       
       const leftMass = calculateSubtreeMass(node.leftChild)
       const rightMass = calculateSubtreeMass(node.rightChild)
-      const totalMass = leftMass + rightMass
+      const armMass = ARM_BASE_MASS + node.length * ARM_MASS_PER_LENGTH
+      const totalMass = leftMass + rightMass + armMass
       
       if (totalMass > 0) {
-        // pivot = m_right / (m_left + m_right)
-        // This positions the pivot such that torques balance
-        let optimalPivot = rightMass / totalMass
+        // For balance with arm mass, the optimal pivot is:
+        // pivot = (rightMass + armMass/2) / (leftMass + rightMass + armMass)
+        // 
+        // This accounts for the arm's own mass being distributed along its length.
+        // When armMass=0, this reduces to rightMass/(leftMass+rightMass)
+        let optimalPivot = (rightMass + armMass / 2) / totalMass
         
         // Clamp to reasonable range
         optimalPivot = Math.max(0.1, Math.min(0.9, optimalPivot))
@@ -311,7 +403,17 @@ const useMobileStore = create((set, get) => ({
     isAnimating: false,
     viewMode: 'flat',
     armYawAngles: {},
-    rotatingArmId: null
+    rotatingArmId: null,
+    // Reset physics state
+    physicsEnabled: false,
+    isPaused: false,
+    timeScale: 1.0,
+    damping: 0.2,
+    windIntensity: 0,
+    windMode: 'uniform',
+    collisionsDetected: [],
+    showSwingEnvelope: false,
+    physicsRefs: {}
   }),
   
   loadPreset: (presetId) => {

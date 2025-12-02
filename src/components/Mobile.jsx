@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, Suspense } from 'react'
 import { useFrame } from '@react-three/fiber'
 import useMobileStore from '../store/mobileStore'
 import Arm from './Arm'
@@ -10,6 +10,9 @@ const ROTATION_SPEED = -1.5
 
 // Default wire length for backwards compatibility
 export const DEFAULT_WIRE_LENGTH = 0.7
+
+// Lazy load physics mobile to avoid loading Rapier when not needed
+const PhysicsMobile = React.lazy(() => import('../physics/PhysicsMobile'))
 
 // Recursively render the mobile tree
 function MobileNode({ node, position, parentRotation = 0, parentYaw = 0, armYawAngles }) {
@@ -107,7 +110,11 @@ function MobileNode({ node, position, parentRotation = 0, parentYaw = 0, armYawA
   return null
 }
 
-export default function Mobile() {
+// Suspension point Y coordinate (must match SuspensionPoint component)
+const SUSPENSION_Y = 5
+
+// Analytical mode mobile (original implementation)
+function AnalyticalMobile() {
   const mobile = useMobileStore((state) => state.mobile)
   const armYawAngles = useMobileStore((state) => state.armYawAngles)
   const rotatingArmId = useMobileStore((state) => state.rotatingArmId)
@@ -122,8 +129,14 @@ export default function Mobile() {
     }
   })
   
-  // Start position: below the suspension point (now with z coordinate)
-  const startPosition = useMemo(() => ({ x: 0, y: 4.3, z: 0 }), [])
+  // Start position: below the suspension point, accounting for root arm's wire length
+  // The wire extends UP from the arm to the suspension point
+  const rootWireLength = mobile?.wireLength ?? DEFAULT_WIRE_LENGTH
+  const startPosition = useMemo(() => ({ 
+    x: 0, 
+    y: SUSPENSION_Y - rootWireLength, 
+    z: 0 
+  }), [rootWireLength])
   
   return (
     <group>
@@ -136,5 +149,21 @@ export default function Mobile() {
       />
     </group>
   )
+}
+
+export default function Mobile() {
+  const physicsEnabled = useMobileStore((state) => state.physicsEnabled)
+  
+  // When physics is enabled, render the physics-based mobile
+  // Otherwise, use the analytical (static equilibrium) version
+  if (physicsEnabled) {
+    return (
+      <Suspense fallback={<AnalyticalMobile />}>
+        <PhysicsMobile />
+      </Suspense>
+    )
+  }
+  
+  return <AnalyticalMobile />
 }
 

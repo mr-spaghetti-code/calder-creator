@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import Scene from './components/Scene'
 import Panel from './ui/Panel'
 import InstructionsModal from './ui/InstructionsModal'
+import PhysicsDropdown from './ui/PhysicsDropdown'
 import useMobileStore from './store/mobileStore'
 import { getUnitSystem, setUnitSystem, subscribeToUnitSystem } from './config/units'
 
@@ -100,6 +101,8 @@ export default function App() {
             </svg>
             <span>{orbitControlsEnabled ? 'Camera Free' : 'Camera Locked'}</span>
           </button>
+          
+          <PhysicsDropdown />
           
           <button 
             className={`view-toggle ${viewMode === '3d' ? 'mode-3d' : 'mode-flat'}`}

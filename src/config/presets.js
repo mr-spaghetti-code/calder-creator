@@ -304,72 +304,98 @@ export const MOBILE_PRESETS = {
     }
   },
   
-  geometricBalance: {
-    id: 'geometricBalance',
-    name: 'Geometric Forms',
-    icon: '🔷',
-    description: 'Mixed shapes in equilibrium',
+  skyScene: {
+    id: 'skyScene',
+    name: 'Sky Scene',
+    icon: '☁️',
+    description: 'Sun, clouds and airplane floating in harmony',
     tree: {
       type: 'arm',
-      length: 4.5,
-      pivotPosition: 0.5,
-      wireLength: 0.6,
+      length: 6,
+      pivotPosition: 0.3,
+      wireLength: 0.5,
       leftChild: {
-        type: 'arm',
-        length: 3.5,
-        pivotPosition: 0.55,
-        wireLength: 1.2,
-        leftChild: {
-          type: 'weight',
-          mass: 2,
-          shape: 'cube',
-          size: 0.35,
-          color: '#ec4899',
-          wireLength: 0.5
-        },
-        rightChild: {
-          type: 'weight',
-          mass: 1.6,
-          shape: 'cylinder',
-          size: 0.3,
-          color: '#8b5cf6',
-          wireLength: 0.9
-        }
+        type: 'weight',
+        mass: 3,
+        shape: 'model',
+        modelId: 'sun',
+        modelScale: 0.06,
+        size: 0.45,
+        color: '#fbbf24',
+        wireLength: 0.5
       },
       rightChild: {
         type: 'arm',
-        length: 3,
-        pivotPosition: 0.4,
-        wireLength: 0.8,
+        length: 5,
+        pivotPosition: 0.45,
+        wireLength: 0.9,
         leftChild: {
-          type: 'weight',
-          mass: 1.2,
-          shape: 'sphere',
-          size: 0.32,
-          color: '#06b6d4',
-          wireLength: 1.1
-        },
-        rightChild: {
           type: 'arm',
-          length: 2.5,
+          length: 4,
           pivotPosition: 0.5,
-          wireLength: 0.7,
+          wireLength: 1.0,
           leftChild: {
-            type: 'weight',
-            mass: 1,
-            shape: 'cube',
-            size: 0.25,
-            color: '#14b8a6',
-            wireLength: 0.6
+            type: 'arm',
+            length: 3.5,
+            pivotPosition: 0.55,
+            wireLength: 1.1,
+            leftChild: {
+              type: 'arm',
+              length: 3,
+              pivotPosition: 0.5,
+              wireLength: 1.0,
+              leftChild: {
+                type: 'weight',
+                mass: 0.6,
+                shape: 'model',
+                modelId: 'cloud_1',
+                modelScale: 0.35,
+                size: 0.3,
+                color: '#f0f9ff',
+                wireLength: 1.4
+              },
+              rightChild: {
+                type: 'weight',
+                mass: 0.6,
+                shape: 'model',
+                modelId: 'cloud_1',
+                modelScale: 0.3,
+                size: 0.28,
+                color: '#e0f2fe',
+                wireLength: 1.6
+              }
+            },
+            rightChild: {
+              type: 'weight',
+              mass: 0.8,
+              shape: 'model',
+              modelId: 'cloud_1',
+              modelScale: 0.4,
+              size: 0.32,
+              color: '#f0f9ff',
+              wireLength: 1.2
+            }
           },
           rightChild: {
             type: 'weight',
-            mass: 1,
-            shape: 'cylinder',
-            size: 0.25,
-            color: '#f59e0b',
-            wireLength: 0.6
+            mass: 1.0,
+            shape: 'model',
+            modelId: 'cloud_1',
+            modelScale: 0.45,
+            size: 0.35,
+            color: '#e0f2fe',
+            wireLength: 1.0
           }
+        },
+        rightChild: {
+          type: 'weight',
+          mass: 1.5,
+          shape: 'model',
+          modelId: 'airplane',
+          modelScale: 0.5,
+          size: 0.4,
+          color: '#94a3b8',
+          wireLength: 0.8
         }
       }
     }

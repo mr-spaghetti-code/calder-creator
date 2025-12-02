@@ -20,7 +20,9 @@ export default function GLBWeight({ node, position }) {
   // Get model config
   const modelConfig = getModelById(node.modelId)
   const modelPath = modelConfig?.path || '/assets/earth.glb'
-  const modelScale = node.modelScale ?? modelConfig?.defaultScale ?? 0.3
+  const baseScale = modelConfig?.baseScale ?? 1
+  const userScale = node.modelScale ?? modelConfig?.defaultScale ?? 0.3
+  const modelScale = baseScale * userScale
   
   // Load the GLB model
   const { scene } = useGLTF(modelPath)

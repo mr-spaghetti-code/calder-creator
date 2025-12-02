@@ -18,3 +18,5 @@ export default function SuspensionPoint({ position = [0, 5, 0] }) {
   )
 }
 
+
+

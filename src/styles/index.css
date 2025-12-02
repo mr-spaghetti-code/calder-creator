@@ -1442,3 +1442,505 @@ input[type="color"]::-webkit-color-swatch {
   flex-shrink: 0;
 }
 
+/* ========================================
+   PHYSICS CONTROLS PANEL
+   ======================================== */
+
+.panel-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 8px 0;
+}
+
+.physics-controls {
+  padding-top: 8px;
+}
+
+.physics-toggle-row {
+  margin-bottom: 16px;
+}
+
+.physics-mode-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--bg-tertiary);
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.physics-mode-btn:hover {
+  background: var(--bg-primary);
+  border-color: var(--text-muted);
+}
+
+.physics-mode-btn.active {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(16, 185, 129, 0.2));
+  border-color: var(--success);
+  color: var(--success);
+}
+
+.physics-mode-btn.active:hover {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.3), rgba(16, 185, 129, 0.3));
+}
+
+/* Time Controls */
+.time-controls {
+  margin-bottom: 16px;
+}
+
+.time-controls-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.time-btn {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-tertiary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.time-btn.playing {
+  background: rgba(234, 179, 8, 0.2);
+  border-color: var(--warning);
+  color: var(--warning);
+}
+
+.time-btn.paused {
+  background: rgba(34, 197, 94, 0.2);
+  border-color: var(--success);
+  color: var(--success);
+}
+
+.time-btn:hover {
+  transform: scale(1.05);
+}
+
+.reset-btn {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.reset-btn:hover {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.time-scale-control {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+}
+
+.time-scale-control label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.time-scale-control input[type="range"] {
+  flex: 1;
+  height: 4px;
+}
+
+.time-scale-value {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 32px;
+  text-align: right;
+}
+
+/* Wind Controls */
+.wind-controls {
+  margin-bottom: 16px;
+}
+
+.wind-mode-toggle {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.wind-mode-btn {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.wind-mode-btn:hover {
+  background: var(--bg-primary);
+}
+
+.wind-mode-btn.active {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Collision Warning */
+.collision-warning {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  color: var(--danger);
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 12px;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* Envelope Toggle */
+.envelope-toggle {
+  margin-bottom: 12px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.checkbox-label:hover {
+  color: var(--text-primary);
+}
+
+/* Physics Tips */
+.physics-tips {
+  padding: 10px 12px;
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  border-left: 3px solid var(--accent);
+}
+
+.physics-tips p {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ========================================
+   PHYSICS DROPDOWN (Top Controls)
+   ======================================== */
+
+.physics-dropdown {
+  position: relative;
+}
+
+.physics-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 10px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(12px);
+  letter-spacing: 0.02em;
+  background: rgba(107, 114, 128, 0.2);
+  color: #9ca3af;
+  border: 1px solid rgba(107, 114, 128, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), 
+              inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.physics-toggle-btn:hover {
+  background: rgba(107, 114, 128, 0.3);
+  border-color: rgba(107, 114, 128, 0.5);
+  transform: translateY(-1px);
+}
+
+.physics-toggle-btn.active {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.25), rgba(16, 185, 129, 0.25));
+  color: #4ade80;
+  border-color: rgba(34, 197, 94, 0.4);
+}
+
+.physics-toggle-btn.active:hover {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.35), rgba(16, 185, 129, 0.35));
+  border-color: rgba(34, 197, 94, 0.6);
+}
+
+.physics-toggle-btn.warning {
+  animation: pulse-warning 1s ease-in-out infinite;
+}
+
+@keyframes pulse-warning {
+  0%, 100% { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), 0 0 0 0 rgba(239, 68, 68, 0.4); }
+  50% { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), 0 0 0 4px rgba(239, 68, 68, 0); }
+}
+
+.physics-toggle-btn .chevron {
+  margin-left: 2px;
+  transition: transform 0.2s ease;
+}
+
+.physics-dropdown-content {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 280px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  overflow: hidden;
+  animation: dropdown-appear 0.15s ease;
+}
+
+@keyframes dropdown-appear {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-section {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.dropdown-section:last-child {
+  border-bottom: none;
+}
+
+.dropdown-section .section-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.dropdown-section .section-label .value {
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+}
+
+.dropdown-toggle-btn {
+  width: 100%;
+  padding: 10px 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.dropdown-toggle-btn:hover {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.dropdown-toggle-btn.enabled {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: var(--danger);
+}
+
+.dropdown-toggle-btn.enabled:hover {
+  background: rgba(239, 68, 68, 0.25);
+}
+
+.dropdown-section .time-controls-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dropdown-section .icon-btn {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.dropdown-section .icon-btn:hover {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.dropdown-section .icon-btn.playing {
+  background: rgba(234, 179, 8, 0.2);
+  border-color: rgba(234, 179, 8, 0.4);
+  color: var(--warning);
+}
+
+.dropdown-section .icon-btn.paused {
+  background: rgba(34, 197, 94, 0.2);
+  border-color: rgba(34, 197, 94, 0.4);
+  color: var(--success);
+}
+
+.dropdown-section .icon-btn.reset:hover {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.4);
+  color: var(--accent);
+}
+
+.dropdown-section .speed-slider {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: var(--bg-tertiary);
+  border-radius: 6px;
+}
+
+.dropdown-section .speed-slider .slider-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dropdown-section .speed-slider input[type="range"] {
+  flex: 1;
+  height: 4px;
+}
+
+.dropdown-section .speed-slider .slider-value {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 28px;
+  text-align: right;
+}
+
+.dropdown-section input[type="range"] {
+  width: 100%;
+}
+
+.dropdown-section .wind-mode-btns {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.dropdown-section .wind-mode-btns button {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.dropdown-section .wind-mode-btns button:hover {
+  background: var(--bg-primary);
+}
+
+.dropdown-section .wind-mode-btns button.active {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.dropdown-section.collision-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.dropdown-tip {
+  padding: 10px 16px;
+  font-size: 11px;
+  color: var(--text-muted);
+  background: var(--bg-tertiary);
+  text-align: center;
+}
+

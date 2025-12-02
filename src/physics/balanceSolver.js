@@ -3,7 +3,37 @@ import { calculateSubtreeMass } from '../models/mobileTree'
 // Maximum tilt angle in radians (~30 degrees)
 const MAX_TILT = Math.PI / 6
 
+// Arm mass density - mass per unit length
+// This should match the physics simulation: mass = 0.1 + length * 0.05
+// For a length of 2, that's 0.2 mass units
+// So density is roughly 0.05 per unit length, plus a base
+const ARM_BASE_MASS = 0.1
+const ARM_MASS_PER_LENGTH = 0.05
+
+// Calculate arm mass based on length (matches physics simulation)
+export function calculateArmMass(arm) {
+  if (!arm || arm.type !== 'arm') return 0
+  return ARM_BASE_MASS + arm.length * ARM_MASS_PER_LENGTH
+}
+
+// Calculate the torque contribution from the arm itself
+// The arm's center of mass is at its geometric center
+// Offset from pivot = (length/2) - (pivotPosition * length) = length * (0.5 - pivotPosition)
+// Positive offset = center of mass is to the RIGHT of pivot
+// Torque = mass * offset (positive = tilts right down)
+function calculateArmSelfTorque(arm) {
+  if (!arm || arm.type !== 'arm') return 0
+  
+  const armMass = calculateArmMass(arm)
+  const centerOffset = arm.length * (0.5 - arm.pivotPosition)
+  
+  // Positive torque means the arm wants to tilt right down
+  // (center of mass is to the right of pivot)
+  return armMass * centerOffset
+}
+
 // Calculate the tilt angle for an arm based on torque imbalance
+// Now includes arm mass contribution
 export function calculateTiltAngle(arm) {
   if (!arm || arm.type !== 'arm') return 0
   
@@ -14,15 +44,26 @@ export function calculateTiltAngle(arm) {
   const leftDistance = arm.pivotPosition * arm.length
   const rightDistance = (1 - arm.pivotPosition) * arm.length
   
-  // Torque = mass × distance
+  // Torque from hanging masses
+  // Positive leftTorque = mass pulling left end down
   const leftTorque = leftMass * leftDistance
   const rightTorque = rightMass * rightDistance
   
-  // Net torque (positive = tilts left down, negative = tilts right down)
-  const netTorque = leftTorque - rightTorque
+  // Torque from arm's own mass
+  // Positive = center of mass is right of pivot, pulling right down
+  const armSelfTorque = calculateArmSelfTorque(arm)
   
-  // Total torque capacity for normalization
-  const totalTorque = leftTorque + rightTorque
+  // Net torque: positive = tilts left down, negative = tilts right down
+  // Left torque pulls left down (positive)
+  // Right torque pulls right down (subtract from net)
+  // Arm self torque: if positive (COM right of pivot), pulls right down (subtract)
+  const netTorque = leftTorque - rightTorque - armSelfTorque
+  
+  // Total torque capacity for normalization (include arm mass)
+  const armMass = calculateArmMass(arm)
+  const totalMass = leftMass + rightMass + armMass
+  const avgDistance = (leftDistance + rightDistance) / 2
+  const totalTorque = totalMass * avgDistance
   
   if (totalTorque === 0) return 0
   
@@ -34,6 +75,7 @@ export function calculateTiltAngle(arm) {
 }
 
 // Calculate balance ratio (0 = very unbalanced, 1 = perfectly balanced)
+// Now includes arm mass contribution
 export function calculateBalanceRatio(arm) {
   if (!arm || arm.type !== 'arm') return 1
   
@@ -45,14 +87,22 @@ export function calculateBalanceRatio(arm) {
   
   const leftTorque = leftMass * leftDistance
   const rightTorque = rightMass * rightDistance
+  const armSelfTorque = calculateArmSelfTorque(arm)
   
-  const totalTorque = leftTorque + rightTorque
+  // Net torque magnitude
+  const netTorque = Math.abs(leftTorque - rightTorque - armSelfTorque)
+  
+  // Total torque capacity
+  const armMass = calculateArmMass(arm)
+  const totalMass = leftMass + rightMass + armMass
+  const avgDistance = (leftDistance + rightDistance) / 2
+  const totalTorque = totalMass * avgDistance
   
   if (totalTorque === 0) return 1
   
-  const imbalance = Math.abs(leftTorque - rightTorque) / totalTorque
+  const imbalance = netTorque / totalTorque
   
-  return 1 - imbalance
+  return Math.max(0, 1 - imbalance)
 }
 
 // Get color based on balance (green -> yellow -> red)

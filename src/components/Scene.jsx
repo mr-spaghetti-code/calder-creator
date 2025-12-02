@@ -4,11 +4,16 @@ import { OrbitControls, Environment } from '@react-three/drei'
 import Ground from './Ground'
 import SuspensionPoint from './SuspensionPoint'
 import Mobile from './Mobile'
+import PhysicsProvider from '../physics/PhysicsProvider'
+import WindSystem from '../physics/WindSystem'
+import PushInteraction from '../physics/PushInteraction'
+import CollisionSystem from '../physics/CollisionSystem'
 import useMobileStore from '../store/mobileStore'
 
 function SceneContent() {
   const clearSelection = useMobileStore((state) => state.clearSelection)
   const orbitControlsEnabled = useMobileStore((state) => state.orbitControlsEnabled)
+  const physicsEnabled = useMobileStore((state) => state.physicsEnabled)
   
   const handlePointerMissed = () => {
     clearSelection()
@@ -38,8 +43,20 @@ function SceneContent() {
       <SuspensionPoint position={[0, 5, 0]} />
       <Ground />
       
-      {/* Mobile */}
-      <Mobile />
+      {/* Physics wrapper */}
+      <PhysicsProvider>
+        {/* Wind system - only active when physics enabled */}
+        {physicsEnabled && <WindSystem />}
+        
+        {/* Collision detection and visualization */}
+        {physicsEnabled && <CollisionSystem />}
+        
+        {/* Push interaction - wraps mobile for drag-to-push */}
+        <PushInteraction>
+          {/* Mobile */}
+          <Mobile />
+        </PushInteraction>
+      </PhysicsProvider>
       
       {/* Camera controls */}
       <OrbitControls 

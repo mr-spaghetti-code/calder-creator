@@ -27,6 +27,31 @@ export const AVAILABLE_MODELS = {
     icon: '🪐',
     defaultScale: 0.35,
     description: 'Low-poly Jupiter planet'
+  },
+  sun: {
+    id: 'sun',
+    path: '/assets/sun.glb',
+    name: 'Sun',
+    icon: '☀️',
+    baseScale: 0.5,
+    defaultScale: 0.3,
+    description: 'Low-poly sun'
+  },
+  cloud_1: {
+    id: 'cloud_1',
+    path: '/assets/cloud_1.glb',
+    name: 'Cloud 1',
+    icon: '☁️',
+    defaultScale: 0.4,
+    description: 'Fluffy cloud'
+  },
+  airplane: {
+    id: 'airplane',
+    path: '/assets/airplane.glb',
+    name: 'Airplane',
+    icon: '✈️',
+    defaultScale: 0.5,
+    description: 'Low-poly airplane'
   }
 }
 

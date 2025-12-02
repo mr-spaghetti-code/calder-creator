@@ -146,7 +146,17 @@ export function cloneTree(node) {
   }
 }
 
-// Calculate total mass of a subtree
+// Arm mass constants (should match balanceSolver.js)
+const ARM_BASE_MASS = 0.1
+const ARM_MASS_PER_LENGTH = 0.05
+
+// Calculate arm mass based on length
+export function calculateArmMass(node) {
+  if (!node || node.type !== 'arm') return 0
+  return ARM_BASE_MASS + node.length * ARM_MASS_PER_LENGTH
+}
+
+// Calculate total mass of a subtree (including arm mass)
 export function calculateSubtreeMass(node) {
   if (!node) return 0
   
@@ -154,7 +164,14 @@ export function calculateSubtreeMass(node) {
     return node.mass
   }
   
-  return calculateSubtreeMass(node.leftChild) + calculateSubtreeMass(node.rightChild)
+  if (node.type === 'arm') {
+    // Include the arm's own mass plus all children
+    const armMass = calculateArmMass(node)
+    const childrenMass = calculateSubtreeMass(node.leftChild) + calculateSubtreeMass(node.rightChild)
+    return armMass + childrenMass
+  }
+  
+  return 0
 }
 
 // Calculate the depth of the tree
